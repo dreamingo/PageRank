@@ -9,31 +9,43 @@ import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.*;
 
 public class Pagerank {
+	
+	public static class Map extends MapReduceBase implements Mapper<LongWritable, AdjacencyNode, LongWritable, AdjacencyNode> {
+		//private final static IntWritable one = new IntWritable(1);
+		//private Text word = new Text();
 
-	public static class Map extends MapReduceBase implements Mapper<LongWritable, AdjacencyNode, Text, IntWritable> {
-		private final static IntWritable one = new IntWritable(1);
-		private Text word = new Text();
-
-		public void map(LongWritable key, AdjacencyNode value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
-			String line = value.toString();
-			StringTokenizer tokenizer = new StringTokenizer(line);
-			while (tokenizer.hasMoreTokens()) {
-				word.set(tokenizer.nextToken());
-				output.collect(word, one);
+		public void map(LongWritable key, AdjacencyNode value, OutputCollector<LongWritable, AdjacencyNode> output, Reporter reporter) throws IOException {
+			Double p = value.getRankValue() / value.getAdjacencyList().size();
+			
+			output.collect(key, value);
+			
+			Iterator<Long> iter = node.getAdjacencyList().iterator();
+			while (iter.hasNext()) {
+				output.collect(iter.next(), new AdjacencyNode(p));
 			}
 		}
 	}
-
-	public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
-		public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
-			int sum = 0;
+	
+	public static class Reduce extends MapReduceBase implements Reducer<LongWritable, AdjacencyNode, LongWritable, AdjacencyNode> {
+		public void reduce(LongWritable key, Iterator<AdjacencyNode> values, OutputCollector<LongWritable, AdjacencyNode> output, Reporter reporter) throws IOException {
+			AdjacencyNode node = null;
+			double s = 0;
+			
 			while (values.hasNext()) {
-				sum += values.next().get();
+				AdjacencyNode p = values.next();
+				if (p.getFlag() == true) {
+					node = (AdjacencyNode)p;
+				}
+				else {
+					s += p.getP();
+				}
 			}
-			output.collect(key, new IntWritable(sum));
+			
+			node.setRankValue(s);
+			output.collect(key, node);
 		}
 	}
-
+	
 	public static void main(String[] args) throws Exception {
 		JobConf conf = new JobConf(Pagerank.class);
 		conf.setJobName("pagerank");

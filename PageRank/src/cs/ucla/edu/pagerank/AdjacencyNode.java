@@ -4,34 +4,47 @@ import java.util.ArrayList;
 
 public class AdjacencyNode {
 
-	private int nodeId;
-	private double rankValue;
-	private ArrayList<Integer> list;
+	private Integer flag;
+	private Double p;
+	
+	private Long nodeId;
+	private Double rankValue;
+	private ArrayList<Integereger> list;
 	//private PagerankObject pagerankObject;
 	
-	public AdjacencyNode(int nodeId, double rankValue) {
-		this.nodeId = nodeId;
-		this.list = new ArrayList<Integer>();
-		this.rankValue = rankValue;
+	public AdjacencyNode(Double p) {
+		this.p = p;
+		this.flag = false;
 	}
 	
-	public void addNeighbor(int e) {
+	public AdjacencyNode(Integer nodeId, Double rankValue) {
+		this.nodeId = nodeId;
+		this.list = new ArrayList<Integereger>();
+		this.rankValue = rankValue;
+		this.flag = true;
+	}
+	
+	public Double getP() {
+		return p;
+	}
+	
+	public void addNeighbor(Integer e) {
 		list.add(e);
 	}
 	
-	public ArrayList<Integer> getAdjacencyList() {
+	public ArrayList<Integereger> getAdjacencyList() {
 		return list;
 	}
 	
-	public int getNodeId() {
+	public Integer getNodeId() {
 		return nodeId;
 	}
 	
-	public double getRankValue() {
+	public Double getRankValue() {
 		return rankValue;
 	}
 
-	public void setRankValue(double rankValue) {
+	public void setRankValue(Double rankValue) {
 		this.rankValue = rankValue;
 	}
 

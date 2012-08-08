@@ -88,7 +88,7 @@ public class AdjacencyNode {
 		else {
 			String s = "";
 			Iterator<String> iter = list.iterator();
-			if (iter.hasNext()) {
+			while (iter.hasNext()) {
 				s += "\t" + iter.next();
 			}
 			return rankValue + s;

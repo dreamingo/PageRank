@@ -10,8 +10,8 @@ import org.apache.hadoop.util.*;
 
 public class Pagerank {
 	
-	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, LongWritable, Text> {
-		public void map(LongWritable key, Text value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
+	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
+		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
 			AdjacencyNode node = null;
 			try {
@@ -23,15 +23,19 @@ public class Pagerank {
 			Double p = node.getRankValue() / node.getAdjacencyList().size();
 			
 			output.collect(key, value);
-			Iterator<Long> iter = node.getAdjacencyList().iterator();
+			System.err.println("1: " + key + "\t" + value);
+			
+			
+			Iterator<String> iter = node.getAdjacencyList().iterator();
 			while (iter.hasNext()) {
-				output.collect(new LongWritable(iter.next()), new Text(p + "\t" + 0));
+				output.collect(new Text(iter.next()), new Text(p + "\t" + 0));
+				System.err.println("2: " + key + "\t" + p);
 			}
 		}
 	}
 	
-	public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, LongWritable, Text> {
-		public void reduce(LongWritable key, Iterator<Text> values, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
+	public static class Reduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
+		public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
 			AdjacencyNode node = null;
 			double s = 0;
@@ -43,11 +47,13 @@ public class Pagerank {
 					e.printStackTrace();
 				}
 				
-				if (node.getFlag()) {
+				if (temp.getFlag()) {
 					node = temp;
+					System.err.println("3.1: " + key + "\t" + "OK");
 				}
 				else {
 					s += temp.getP();
+					System.err.println("3.2: " + key + "\t" + s);
 				}
 			}
 			
@@ -60,13 +66,14 @@ public class Pagerank {
 		JobConf conf = new JobConf(Pagerank.class);
 		conf.setJobName("pagerank");
 
-		conf.setOutputKeyClass(LongWritable.class);
+		conf.setOutputKeyClass(Text.class);
 		conf.setOutputValueClass(Text.class);
 
 		conf.setMapperClass(Map.class);
-		conf.setCombinerClass(Reduce.class);
+		conf.setPartitionerClass(KeyPartitioner.class);
+		//conf.setCombinerClass(Reduce.class);
 		conf.setReducerClass(Reduce.class);
-
+		
 		conf.setInputFormat(KeyValueTextInputFormat.class);
 		conf.setOutputFormat(TextOutputFormat.class);
 

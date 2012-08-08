@@ -11,9 +11,9 @@ public class AdjacencyNode {
 	private Boolean flag;
 	private Double p;
 	
-	private Long nodeId;
+	private String nodeId;
 	private Double rankValue;
-	private ArrayList<Long> list;
+	private ArrayList<String> list;
 	//private PagerankObject pagerankObject;
 	
 	private AdjacencyNode(Double p) {
@@ -21,14 +21,20 @@ public class AdjacencyNode {
 		this.flag = false;
 	}
 	
-	private AdjacencyNode(Long nodeId, Double rankValue) {
+	private AdjacencyNode(String nodeId, Double rankValue) {
 		this.nodeId = nodeId;
-		this.list = new ArrayList<Long>();
+		this.list = new ArrayList<String>();
 		this.rankValue = rankValue;
 		this.flag = true;
 	}
 	
-	public static AdjacencyNode construct(LongWritable key, Text value) throws Exception {
+	/*
+	public static AdjacencyNode construct(Text key, Text value) throws Exception {
+		return construct(new LongWritable(Long.parseLong(key.toString())), value);
+	}
+	*/
+	
+	public static AdjacencyNode construct(Text key, Text value) throws Exception {
 		String[] array = value.toString().split("\t");
 		if (array == null || array.length == 0) throw new Exception();
 		
@@ -43,28 +49,27 @@ public class AdjacencyNode {
 			//Format:
 			//0.3	1	2	3
 			//0.2
-			AdjacencyNode node = new AdjacencyNode(key.get(), rankValue);
+			AdjacencyNode node = new AdjacencyNode(key.toString(), rankValue);
 			for (int i=1; i < array.length; i++) {
-				node.addNeighbor(Long.parseLong(array[i]));
+				node.addNeighbor(array[i]);
 			}
 			return node;
 		}
-		
 	}
 	
 	public Double getP() {
 		return p;
 	}
 	
-	public void addNeighbor(Long e) {
+	public void addNeighbor(String e) {
 		list.add(e);
 	}
 	
-	public ArrayList<Long> getAdjacencyList() {
+	public ArrayList<String> getAdjacencyList() {
 		return list;
 	}
 	
-	public Long getNodeId() {
+	public String getNodeId() {
 		return nodeId;
 	}
 	
@@ -82,7 +87,7 @@ public class AdjacencyNode {
 		}
 		else {
 			String s = "";
-			Iterator<Long> iter = list.iterator();
+			Iterator<String> iter = list.iterator();
 			if (iter.hasNext()) {
 				s += "\t" + iter.next();
 			}
@@ -95,7 +100,7 @@ public class AdjacencyNode {
 	}
 	
 	public static void main(String[] args) {
-		AdjacencyNode node = new AdjacencyNode(100L, 0.2);
+		AdjacencyNode node = new AdjacencyNode("100", 0.2);
 		//node.addNeighbor(2L);
 		//node.addNeighbor(4L);
 		

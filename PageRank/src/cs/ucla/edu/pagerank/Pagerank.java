@@ -10,6 +10,8 @@ import org.apache.hadoop.util.*;
 
 public class Pagerank {
 	
+	public static int ITERATION_TIMES = 1;
+	
 	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
 		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
@@ -63,6 +65,14 @@ public class Pagerank {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		ITERATION_TIMES = Integer.parseInt(args[0]);
+		for (int runs = 1; runs < ITERATION_TIMES; runs++) {
+			runJob(runs, false);
+        }
+		runJob(ITERATION_TIMES, true);
+	}
+	
+	private static void runJob(int runs, boolean last) throws Exception {
 		JobConf conf = new JobConf(Pagerank.class);
 		conf.setJobName("pagerank");
 
@@ -77,9 +87,13 @@ public class Pagerank {
 		conf.setInputFormat(KeyValueTextInputFormat.class);
 		conf.setOutputFormat(TextOutputFormat.class);
 
-		FileInputFormat.setInputPaths(conf, new Path(args[0]));
-		FileOutputFormat.setOutputPath(conf, new Path(args[1]));
-
+		FileInputFormat.setInputPaths(conf, new Path("file" + runs));
+		if (last) {
+			FileOutputFormat.setOutputPath(conf, new Path("output"));
+		}
+		else {
+			FileOutputFormat.setOutputPath(conf, new Path("file" + (runs+1)));
+		}
 		JobClient.runJob(conf);
 	}
 }

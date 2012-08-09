@@ -1,0 +1,13 @@
+bin/hadoop fs -put pagerank_input file1
+
+mkdir pagerank_classes
+
+javac -classpath ${HADOOP_HOME}/hadoop-core-1.0.3.jar -d pagerank_classes Pagerank.java AdjacencyNode.java
+
+jar -cvf ~/pagerank.jar -C pagerank_classes/ .
+
+bin/hadoop jar pagerank.jar cs.ucla.edu.pagerank.Pagerank 5
+
+bin/hadoop fs -get output output
+
+cat output/*

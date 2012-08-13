@@ -14,7 +14,7 @@
 1 File Operations
 
 cd: . .. ~ /
-ls: -1 -B
+ls: -1 -hl -B
 pwd:
 cp:
 mv:
@@ -62,6 +62,7 @@ clear:
 echo:
 sleep:
 date:
+cal:
 ln: -r
 ldd:
 

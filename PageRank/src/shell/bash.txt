@@ -1,0 +1,113 @@
+--------------------------------------------------------------------------
+--Linux Bash Commands -- Ver. 1.0					--
+--									--
+--Notice: This file only list a bunch of bash commands.		        --
+--								        --
+--For detial explanations, please refer to the man page.   	        --	
+--								        --
+--Usage: ~$ man *command_name*					        --
+--eg.    ~$ man ls						        --
+--								        --
+--							                --
+--------------------------------------------------------------------------
+
+1 File Operations
+
+cd: . .. ~ /
+ls: -1 -hl -B
+pwd:
+cp:
+mv:
+stat: .
+touch:
+file:
+
+2 Text Operations
+
+cut:
+top:
+head:
+tail:
+grep: -o
+sort:
+fmt:
+wc:
+
+3 Editors
+
+gedit:
+vim:
+emacs:
+cat:
+awk:
+
+4 Installation
+
+dpkg: -l -r
+tar: -cvf -xvf -zxvf
+
+5 System
+
+ps: -a -A -fp
+kill: -KILL
+chmod: 777 755
+sudo:
+locate:
+(sudo updatedb)
+source:
+find:
+locate:
+clear:
+
+echo:
+sleep:
+date:
+cal:
+ln: -r
+ldd:
+
+
+6 Network
+
+7 Pipe
+
+cat dic.txt | more
+ls -1B | sort | less > current.txt
+| more
+| less
+
+8 I/O Redirection
+
+ps -A > ps_list.txt
+ls -1 >> ls_list.txt
+ls > temp; head -1 < temp
+
+9 Help
+
+man *command_name*
+
+10 Others 
+
+Basic Shell Script Format
+
+#!/bin/sh
+
+echo y
+sleep 1
+echo n
+
+Execute a file or script in current directory
+
+./*executable_file_name*
+
+Examples:
+--killQQ.sh
+
+#!/bin/bash
+myvar=$(ps -A | grep QQ.exe | awk '{print $1}')
+echo ${myvar}
+kill -KILL ${myvar}
+
+--single line
+$ > ps -A | grep QQ.exe | awk '{print $1}' > tmp ; rm tmp
+

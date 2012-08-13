@@ -1,0 +1,2 @@
+#!/bin/bash
+jar -cvf ~/hadoop-1.0.3/hadoop-1.0.3/pagerank.jar -C ~/git/PageRank/PageRank/bin/ .

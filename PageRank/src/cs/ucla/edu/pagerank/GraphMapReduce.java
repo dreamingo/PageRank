@@ -12,7 +12,11 @@ public class GraphMapReduce {
 		
 	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
 		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-			output.collect(key, value);
+			if (key.toString().startsWith("#")) {
+			}
+			else {
+				output.collect(key, value);
+			}
 		}
 	}
 	
@@ -37,9 +41,9 @@ public class GraphMapReduce {
 
 		conf.setOutputKeyClass(Text.class);
 		conf.setOutputValueClass(Text.class);
-
+		
 		conf.setMapperClass(Map.class);
-		conf.setPartitionerClass(KeyPartitioner.class);
+		//conf.setPartitionerClass(KeyPartitioner.class);
 		//conf.setCombinerClass(Reduce.class);
 		conf.setReducerClass(Reduce.class);
 		

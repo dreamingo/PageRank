@@ -11,6 +11,7 @@ import org.apache.hadoop.util.*;
 public class Pagerank_Datalog {
 	
 	public static int ITERATION_TIMES = 1;
+	public static int count = 0;
 	
 	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
 		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
@@ -22,16 +23,28 @@ public class Pagerank_Datalog {
 				e.printStackTrace();
 			}
 			
-			Double p = node.getRankValue() / node.getAdjacencyList().size();
+			Double p = null;
+			try {
+				p = node
+					.getRankValue() / 
+					node
+					.getAdjacencyList()
+					.size();
+				count++;
+			} catch (Exception e) {
+				System.out.println("Error: " + count + " !\n");
+				e.printStackTrace();
+				System.exit(1);
+			}
 			
 			output.collect(key, value);
-			System.err.println("1: " + key + "\t" + value);
+			//System.err.println("1: " + key + "\t" + value);
 			
 			
 			Iterator<String> iter = node.getAdjacencyList().iterator();
 			while (iter.hasNext()) {
-				output.collect(new Text(iter.next()), new Text(p + "\t" + 0));
-				System.err.println("2: " + key + "\t" + p);
+				output.collect(new Text(iter.next()), new Text(p + "\t" + "*"));
+				//System.err.println("2: " + key + "\t" + p);
 			}
 		}
 	}
@@ -41,6 +54,7 @@ public class Pagerank_Datalog {
 			
 			AdjacencyNode node = null;
 			double s = 0;
+			boolean t = false;
 			while (values.hasNext()) {
 				AdjacencyNode temp = null;
 				try {
@@ -51,18 +65,29 @@ public class Pagerank_Datalog {
 				
 				if (temp.getFlag()) {
 					node = temp;
-					System.err.println("3.1: " + key + "\t" + "OK");
+					t = true;
+					//System.err.println("3.1: " + key + "\t" + "OK");
 				}
 				else {
 					s += temp.getP();
-					System.err.println("3.2: " + key + "\t" + s);
+					//System.err.println("3.2: " + key + "\t" + s);
 				}
 			}
 			
-			//The only modification
-			if (s > node.getRankValue()) {
-				node.setRankValue(s);
+			//Main modifications done here
+			//System.err.println("Flag State: " + t + " " + key);
+			try {
+				if (s > node.getRankValue()) {
+					node.setRankValue(s);
+				}
 			}
+			catch (Exception e) {
+				//it means the node has no outsource nodes
+				//due to the imperfect of dataset
+				e.printStackTrace();
+				node = new AdjacencyNode(key.toString(), s);
+			}
+			
 			output.collect(key, new Text(node.toString()));
 		}
 	}

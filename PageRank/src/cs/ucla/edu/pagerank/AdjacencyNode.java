@@ -21,7 +21,7 @@ public class AdjacencyNode {
 		this.flag = false;
 	}
 	
-	private AdjacencyNode(String nodeId, Double rankValue) {
+	public AdjacencyNode(String nodeId, Double rankValue) {
 		this.nodeId = nodeId;
 		this.list = new ArrayList<String>();
 		this.rankValue = rankValue;
@@ -40,9 +40,9 @@ public class AdjacencyNode {
 		
 		Double rankValue = Double.parseDouble(array[0]);
 		
-		if ((array.length == 2) && (array[1].equals("0"))) {
+		if ((array.length == 2) && (array[1].equals("*"))) {
 			//Format:
-			//0.3	0
+			//0.3	*
 			return new AdjacencyNode(rankValue);
 		}
 		else {
@@ -83,7 +83,7 @@ public class AdjacencyNode {
 
 	public String toString() {
 		if (!flag) {
-			return rankValue + "\t" + 0;
+			return rankValue + "\t" + "*";
 		}
 		else {
 			String s = "";

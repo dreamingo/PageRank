@@ -9,8 +9,11 @@ import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.*;
 
 public class Pagerank {
+
+	public static int count = 0;
+	public static String taskname = "undefined_task";
+	public static int iteration_times = 0;
 	
-	public static int ITERATION_TIMES = 1;
 	
 	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
 		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
@@ -25,13 +28,13 @@ public class Pagerank {
 			Double p = node.getRankValue() / node.getAdjacencyList().size();
 			
 			output.collect(key, value);
-			System.err.println("1: " + key + "\t" + value);
+			//System.err.println("1: " + key + "\t" + value);
 			
 			
 			Iterator<String> iter = node.getAdjacencyList().iterator();
 			while (iter.hasNext()) {
-				output.collect(new Text(iter.next()), new Text(p + "\t" + 0));
-				System.err.println("2: " + key + "\t" + p);
+				output.collect(new Text(iter.next()), new Text(p + "\t" + "*"));
+				//System.err.println("2: " + key + "\t" + p);
 			}
 		}
 	}
@@ -40,7 +43,10 @@ public class Pagerank {
 		public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
 			AdjacencyNode node = null;
+
 			double s = 0;
+			//boolean t = false;
+			
 			while (values.hasNext()) {
 				AdjacencyNode temp = null;
 				try {
@@ -51,28 +57,46 @@ public class Pagerank {
 				
 				if (temp.getFlag()) {
 					node = temp;
-					System.err.println("3.1: " + key + "\t" + "OK");
+					//t = true;
+					//System.err.println("3.1: " + key + "\t" + "OK");
 				}
 				else {
 					s += temp.getP();
-					System.err.println("3.2: " + key + "\t" + s);
+					//System.err.println("3.2: " + key + "\t" + s);
 				}
 			}
 			
-			node.setRankValue(s);
+			try {
+				node.setRankValue(s);
+			}
+			catch (Exception e) {
+				//it means the node has no outsource nodes
+				//due to the imperfect of dataset
+				e.printStackTrace();
+				node = new AdjacencyNode(key.toString(), s);
+			}
+			
 			output.collect(key, new Text(node.toString()));
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		ITERATION_TIMES = Integer.parseInt(args[0]);
-		for (int runs = 1; runs < ITERATION_TIMES; runs++) {
-			runJob(runs, false);
+		if (args.length != 2) {
+			System.out.println("Pagerank: [1] ITERATION_TIMES [2] TASKNAME !");
+			return;
+		}
+		
+		iteration_times = Integer.parseInt(args[0]);
+		taskname = args[1];
+		
+		/* runs number starts from 0 */
+		for (int runs = 0; runs < iteration_times; runs++) {
+			runJob(runs);
         }
-		runJob(ITERATION_TIMES, true);
+		
 	}
 	
-	private static void runJob(int runs, boolean last) throws Exception {
+	private static void runJob(int runs) throws Exception {
 		JobConf conf = new JobConf(Pagerank.class);
 		conf.setJobName("pagerank");
 
@@ -87,13 +111,9 @@ public class Pagerank {
 		conf.setInputFormat(KeyValueTextInputFormat.class);
 		conf.setOutputFormat(TextOutputFormat.class);
 
-		FileInputFormat.setInputPaths(conf, new Path("file" + runs));
-		if (last) {
-			FileOutputFormat.setOutputPath(conf, new Path("output"));
-		}
-		else {
-			FileOutputFormat.setOutputPath(conf, new Path("file" + (runs+1)));
-		}
+		FileInputFormat.setInputPaths(conf, new Path(taskname + "_Origin_" + runs));
+		FileOutputFormat.setOutputPath(conf, new Path(taskname + "_Origin_" + (runs+1)));
+		
 		JobClient.runJob(conf);
 	}
 }

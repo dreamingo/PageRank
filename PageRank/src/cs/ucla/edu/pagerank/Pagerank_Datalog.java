@@ -10,8 +10,10 @@ import org.apache.hadoop.util.*;
 
 public class Pagerank_Datalog {
 	
-	public static int ITERATION_TIMES = 1;
 	public static int count = 0;
+	public static String taskname = "undefined_task";
+	public static int iteration_times = 0;
+	
 	
 	public static class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {
 		public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
@@ -53,8 +55,10 @@ public class Pagerank_Datalog {
 		public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
 			
 			AdjacencyNode node = null;
+			
 			double s = 0;
-			boolean t = false;
+			//boolean t = false;
+			
 			while (values.hasNext()) {
 				AdjacencyNode temp = null;
 				try {
@@ -65,7 +69,7 @@ public class Pagerank_Datalog {
 				
 				if (temp.getFlag()) {
 					node = temp;
-					t = true;
+					//t = true;
 					//System.err.println("3.1: " + key + "\t" + "OK");
 				}
 				else {
@@ -93,16 +97,24 @@ public class Pagerank_Datalog {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		ITERATION_TIMES = Integer.parseInt(args[0]);
-		for (int runs = 1; runs < ITERATION_TIMES; runs++) {
-			runJob(runs, false);
+		if (args.length != 2) {
+			System.out.println("Pagerank_Datalog: [1] ITERATION_TIMES [2] TASKNAME !");
+			return;
+		}
+		
+		iteration_times = Integer.parseInt(args[0]);
+		taskname = args[1];
+		
+		/* runs number starts from 0 */
+		for (int runs = 0; runs < iteration_times; runs++) {
+			runJob(runs);
         }
-		runJob(ITERATION_TIMES, true);
+		
 	}
 	
-	private static void runJob(int runs, boolean last) throws Exception {
+	private static void runJob(int runs) throws Exception {
 		JobConf conf = new JobConf(Pagerank_Datalog.class);
-		conf.setJobName("pagerank");
+		conf.setJobName("pagerank_datalog");
 
 		conf.setOutputKeyClass(Text.class);
 		conf.setOutputValueClass(Text.class);
@@ -115,13 +127,9 @@ public class Pagerank_Datalog {
 		conf.setInputFormat(KeyValueTextInputFormat.class);
 		conf.setOutputFormat(TextOutputFormat.class);
 
-		FileInputFormat.setInputPaths(conf, new Path("file" + runs));
-		if (last) {
-			FileOutputFormat.setOutputPath(conf, new Path("output"));
-		}
-		else {
-			FileOutputFormat.setOutputPath(conf, new Path("file" + (runs+1)));
-		}
+		FileInputFormat.setInputPaths(conf, new Path(taskname + "_Datalog_" + runs));
+		FileOutputFormat.setOutputPath(conf, new Path(taskname + "_Datalog_" + (runs+1)));
+		
 		JobClient.runJob(conf);
 	}
 }

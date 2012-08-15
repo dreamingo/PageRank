@@ -66,8 +66,11 @@ cal:
 ln: -r
 ldd:
 
-
 6 Network
+ss
+ip route
+ip -s link
+ip maddr
 
 7 Pipe
 
